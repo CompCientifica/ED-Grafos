@@ -32,6 +32,7 @@ public class Graph<T> {
     Vertice<T> start = this.getVertice(dataStart);
     Vertice<T> end = this.getVertice(dataEnd);
     Edge<T> edge = new Edge<T>(weight, start, end);
+
     start.addEdgeOut(edge);
     start.addEdgeIn(edge);
     this.edges.add(edge);
@@ -41,9 +42,11 @@ public class Graph<T> {
     ArrayList<Vertice<T>> foundVertices = new ArrayList<Vertice<T>>();
     ArrayList<Vertice<T>> verticesQueue = new ArrayList<Vertice<T>>();
     Vertice<T> currentVertice = this.vertices.get(0);
+
     foundVertices.add(currentVertice);
     System.out.println(currentVertice.getData());
     verticesQueue.add(currentVertice);
+
     while(verticesQueue.size() > 0) {
       Vertice<T> visitedVertice = verticesQueue.get(0);
       for(int i = 0; i < visitedVertice.getEdgesOut().size();i++) {
@@ -57,4 +60,25 @@ public class Graph<T> {
       verticesQueue.remove(0);
     }
   }
+
+  public boolean hasEulerianPath() {
+    // Verifica se o grafo está vazio
+    if (vertices.isEmpty()) return false;
+
+    // Conta o número de vértices de grau ímpar
+    int oddDegreeVertices = 0;
+    for (Vertice<T> vertice : vertices) {
+      int degree = vertice.getDegree();
+      if (degree % 2 != 0) {
+        oddDegreeVertices++;
+      }
+    }
+
+    // Se houver mais de dois vértices de grau ímpar, não pode haver caminho euleriano
+    if (oddDegreeVertices > 2) return false;
+
+    // Se houver zero ou dois vértices de grau ímpar, o grafo pode ter um caminho euleriano
+    return oddDegreeVertices == 0 || oddDegreeVertices == 2;
+  }
+
 }

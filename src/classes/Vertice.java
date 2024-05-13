@@ -44,4 +44,9 @@ public class Vertice<T> {
   public void addEdgeOut(Edge<T> edge) {
     this.edgesOut.add(edge);
   }
+
+  public int getDegree() {
+    return edgesIn.size() + edgesOut.size();
+  }
+
 }
