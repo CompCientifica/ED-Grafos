@@ -1,84 +1,107 @@
 package classes;
-
-import java.util.ArrayList;
-
+import java.util.*;
 public class Graph<T> {
-  private ArrayList<Vertice<T>> vertices;
-  private ArrayList<Edge<T>> edges;
+  private List<Vertice<T>> vertices;
+  private List<Aresta<T>> arestas;
 
+  //Construtor
   public Graph() {
-    this.vertices = new ArrayList<Vertice<T>>();
-    this.edges = new ArrayList<Edge<T>>();
+    vertices = new ArrayList<>();
+    arestas = new ArrayList<>();
   }
 
-  public Vertice<T> getVertice(T data) {
-    Vertice<T> vertice = null;
-    for (int i = 0; i < this.vertices.size(); i++) {
-      Vertice<T> currentVertice = this.vertices.get(i);
-      if (currentVertice.getData().equals(data)) {
-        vertice = currentVertice;
-        break;
-      }
+  //Adiciona um vértice ao grafo
+  public void addVertice(T valor) {
+    Vertice<T> vertice = new Vertice<>(valor);
+    if(!vertices.contains(vertice))
+      vertices.add(vertice);
+  }
+
+  //Adiciona uma aresta ao grafo
+  public void addAresta(T origemValor, T destinoValor, double peso) {
+    Vertice<T> origem = null;
+    Vertice<T> destino = null;
+
+    for(Vertice<T> v : vertices) {
+      if (v.getValor().equals(origemValor))
+        origem = v;
+      if(v.getValor().equals(destinoValor))
+        destino = v;
     }
-    return vertice;
+
+    if(origem != null && destino != null)
+      arestas.add(new Aresta<>(origem, destino, peso));
   }
 
-  public void addVertice(T data) {
-    Vertice<T> newVertice = new Vertice<T>(data);
-    this.vertices.add(newVertice);
+  public void percorrerGrafo() {
+    for (Aresta<T> aresta : arestas) {
+      System.out.println(aresta.getOrigem() + " -> " + aresta.getDestino() + " (Peso: " + aresta.getPeso() + ")");
+    }
   }
 
-  public void addEdge(Double weight, T dataStart, T dataEnd) {
-    Vertice<T> start = this.getVertice(dataStart);
-    Vertice<T> end = this.getVertice(dataEnd);
-    Edge<T> edge = new Edge<T>(weight, start, end);
-
-    start.addEdgeOut(edge);
-    start.addEdgeIn(edge);
-    this.edges.add(edge);
+  //Função para verificar se todos os vértices têm grau par(Maneira de se verificar se um grafo é conexo)
+  private boolean eConexo() {
+    int oddDegreeCount = 0;
+    for(Vertice<T> v : vertices) {
+      int degree = 0;
+      for(Aresta<T> a : arestas) {
+        if (a.getOrigem().equals(v) || a.getDestino().equals(v))
+          degree++;
+      }
+      if(degree % 2 != 0)
+        oddDegreeCount++;
+    }
+    return (oddDegreeCount == 0 || oddDegreeCount == 2);
   }
 
-  public void depthSearch() {
-    ArrayList<Vertice<T>> foundVertices = new ArrayList<Vertice<T>>();
-    ArrayList<Vertice<T>> verticesQueue = new ArrayList<Vertice<T>>();
-    Vertice<T> currentVertice = this.vertices.get(0);
+  //Função para verificar se o grafo é euleriano
+  public boolean eEuleriano() {
+    if(!eConexo())
+      return false;
 
-    foundVertices.add(currentVertice);
-    System.out.println(currentVertice.getData());
-    verticesQueue.add(currentVertice);
+    for (Vertice<T> v : vertices) {
+      int degree = 0;
+      for(Aresta<T> a : arestas) {
+        if(a.getOrigem().equals(v) || a.getDestino().equals(v))
+          degree++;
+      }
+      if (degree % 2 != 0)
+        return false;
+    }
 
-    while(verticesQueue.size() > 0) {
-      Vertice<T> visitedVertice = verticesQueue.get(0);
-      for(int i = 0; i < visitedVertice.getEdgesOut().size();i++) {
-        Vertice<T> nextVertice = visitedVertice.getEdgesOut().get(i).getEnd();
-        if(!foundVertices.contains(nextVertice)) {
-          foundVertices.add(nextVertice);
-          System.out.println(nextVertice.getData());
-          verticesQueue.add(nextVertice);
+    return true;
+  }
+
+  //Função para imprimir o caminho euleriano(Algorítmo de Fleury)
+  public void printEulerTour() {
+    if (!eEuleriano()) {
+      System.out.println("O grafo não é euleriano");
+      return;
+    }
+
+    Stack<Vertice<T>> stack = new Stack<>();
+    List<Aresta<T>> tempArestas = new ArrayList<>(arestas);
+
+    Vertice<T> startVertex = vertices.get(0);
+
+    stack.push(startVertex);
+    while (!stack.isEmpty()) {
+      Vertice<T> currentVertex = stack.peek();
+      boolean hasNext = false;
+      for (Aresta<T> a : tempArestas) {
+        if(a.getOrigem().equals(currentVertex)) {
+          hasNext = true;
+          Vertice<T> nextVertex = a.getDestino();
+          stack.push(nextVertex);
+          tempArestas.remove(a);
+          break;
         }
       }
-      verticesQueue.remove(0);
-    }
-  }
-
-  public boolean hasEulerianPath() {
-    // Verifica se o grafo está vazio
-    if (vertices.isEmpty()) return false;
-
-    // Conta o número de vértices de grau ímpar
-    int oddDegreeVertices = 0;
-    for (Vertice<T> vertice : vertices) {
-      int degree = vertice.getDegree();
-      if (degree % 2 != 0) {
-        oddDegreeVertices++;
+      if(!hasNext) {
+        stack.pop();
+        System.out.print(currentVertex + " ");
       }
     }
-
-    // Se houver mais de dois vértices de grau ímpar, não pode haver caminho euleriano
-    if (oddDegreeVertices > 2) return false;
-
-    // Se houver zero ou dois vértices de grau ímpar, o grafo pode ter um caminho euleriano
-    return oddDegreeVertices == 0 || oddDegreeVertices == 2;
+    System.out.println();
   }
-
 }
