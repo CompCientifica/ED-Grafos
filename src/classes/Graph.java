@@ -39,20 +39,32 @@ public class Graph<T> {
     }
   }
 
-  //Função para verificar se todos os vértices têm grau par(Maneira de se verificar se um grafo é conexo)
+  //Função para verificar se todos os vértices têm grau ímpar(Maneira de se verificar se um grafo é conexo)
   private boolean eConexo() {
-    int oddDegreeCount = 0;
-    for(Vertice<T> v : vertices) {
-      int degree = 0;
-      for(Aresta<T> a : arestas) {
-        if (a.getOrigem().equals(v) || a.getDestino().equals(v))
-          degree++;
+    Set<Vertice<T>> visitados = new HashSet<>();
+    Queue<Vertice<T>> fila = new LinkedList<>();
+    Vertice<T> verticeInicial = vertices.get(0); //A busca pode começar a partir de qualquer vértice, mas escolhemos o 0
+
+    fila.add(verticeInicial);
+    visitados.add(verticeInicial);
+
+    while (!fila.isEmpty()) {
+      Vertice<T> verticeAtual = fila.poll();
+      for (Aresta<T> aresta : arestas) {
+        if (aresta.getOrigem().equals(verticeAtual) && !visitados.contains(aresta.getDestino())) {
+          fila.add(aresta.getDestino());
+          visitados.add(aresta.getDestino());
+        }
+        if (aresta.getDestino().equals(verticeAtual) && !visitados.contains(aresta.getOrigem())) {
+          fila.add(aresta.getOrigem());
+          visitados.add(aresta.getOrigem());
+        }
       }
-      if(degree % 2 != 0)
-        oddDegreeCount++;
     }
-    return (oddDegreeCount == 0 || oddDegreeCount == 2);
+
+    return visitados.size() == vertices.size(); //Se todos as arestas forem visitadas, o grafo é conexo
   }
+
 
   //Função para verificar se o grafo é euleriano
   public boolean eEuleriano() {
@@ -148,7 +160,6 @@ public class Graph<T> {
         }
       }
     }
-
     //Construção do caminho mínimo
     Stack<Vertice<T>> caminho = new Stack<>();
     Vertice<T> verticeAtual = destino;
@@ -156,7 +167,6 @@ public class Graph<T> {
       caminho.push(verticeAtual);
       verticeAtual = predecessores.get(verticeAtual);
     }
-
     //Printando o caminho mínimo
     System.out.println("Menor caminho de " + origemValor + " para " + destinoValor + ":");
     while (!caminho.isEmpty()) {
