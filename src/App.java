@@ -17,7 +17,7 @@ public class App {
 
         if (!g.eEuleriano()) {
             System.out.println("O grafo não é euleriano");
-            g.percorrerGrafo();
+            g.imprimirMenorCaminhoDijkstra("A","D");
             System.out.print("\n");
         } else {
             System.out.println("O grafo possui um caminho euleriano:");
@@ -37,7 +37,7 @@ public class App {
         g2.addAresta("D", "A", 6.2);
 
         if (!g2.eEuleriano()) {
-            g2.percorrerGrafo();
+            g2.imprimirMenorCaminhoDijkstra("A", "D");
             System.out.println("O grafo não é euleriano");
             System.out.print("\n");
         } else {
